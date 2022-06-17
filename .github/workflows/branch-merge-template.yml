@@ -6,7 +6,7 @@ name: Branch Merge to Template
 on:
   push:
     branches:
-      - "@langnang-temp/langnang-temp.github.io"
+      - "@langnang-temp/root"
 jobs:
   sync-branch:
     runs-on: ubuntu-latest
@@ -16,6 +16,6 @@ jobs:
       - name: Merge Branch
         uses: devmasx/merge-branch@master
         with:
-          from_branch: "@langnang-temp/langnang-temp.github.io"
+          from_branch: "@langnang-temp/root"
           target_branch: "@langnang-temp/php"
           github_token: ${{ github.GITHUB_TOKEN }}
