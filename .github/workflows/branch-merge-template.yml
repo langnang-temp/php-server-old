@@ -17,5 +17,5 @@ jobs:
         uses: devmasx/merge-branch@master
         with:
           from_branch: "@langnang-temp/root"
-          target_branch: "@langnang-temp/root"
+          target_branch: "@langnang-temp/php"
           github_token: ${{ github.GITHUB_TOKEN }}

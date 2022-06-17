@@ -1,13 +1,18 @@
-# root
+
+# php
+
+- `Dependency` [Composer](https://packagist.org/)
+
 
 ## Branches
 
 ```sh
-┌───────────────────────┐       ┌───────────┐       ┌──────────┐
-|                       |       |           |       |          |
-|  @langnang-temp/root  | ====> |  develop  | ====> |  master  |
-|    Sync to remote     |       |           |       |          |
-└───────────────────────┘       └───────────┘       └──────────┘
+┌───────────────────────┐       ┌──────────────────────┐       ┌───────────┐       ┌──────────┐
+|                       |       |                      |       |           |       |          |
+|  @langnang-temp/root  | ====> |  @langnang-temp/php  | ====> |  develop  | ====> |  master  |
+|   Sync from template  |       |    Sync to remote    |       |           |       |          |
+└───────────────────────┘       └──────────────────────┘       └───────────┘       └──────────┘
+
 ```
 
 ### Sync to remote

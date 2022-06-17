@@ -18,7 +18,7 @@ jobs:
       - name: repo-sync
         uses: repo-sync/github-sync@v2
         with:
-          source_repo: "langnang-temp/root"
-          source_branch: "@langnang-temp/root"
-          destination_branch: "@langnang-temp/root"
+          source_repo: "langnang-temp/php"
+          source_branch: "@langnang-temp/php"
+          destination_branch: "@langnang-temp/php"
           github_token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,11 @@
+{
+  "name": "langnang-temp/php",
+  "description": "",
+  "authors": [
+    {
+      "name": "langnang",
+      "email": "langnang.chen@outlook.com"
+    }
+  ],
+  "require": {}
+}
