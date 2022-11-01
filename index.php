@@ -80,6 +80,15 @@ return array(
       $rows = $conn->fetchAllAssociative($sql_select_list);
       var_dump($rows);
     });
+    // try-catch
+    $router->addRoute('GET', '/try-catch', function ($vars) {
+      try {
+        throw  new Exception("test try-catch exception.");
+        exit;
+      } catch (Exception $error) {
+        echo $error->getMessage();
+      }
+    });
   });
 });
 
