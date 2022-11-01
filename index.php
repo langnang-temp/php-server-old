@@ -1,7 +1,17 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
 
+// 伪静态
 $rewrite = "/?";
+
+// create a log channel
+$log = new Monolog\Logger('name');
+$log->pushHandler(new Monolog\Handler\StreamHandler(__DIR__ . '/.log', Monolog\Logger::DEBUG));
+
+// add records to the log
+$log->warning('Foo');
+$log->error('Bar');
+
 
 $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $router) use ($rewrite) {
   $router->addGroup($rewrite, function (FastRoute\RouteCollector $router) {
@@ -18,6 +28,13 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $rou
     // The /{title} suffix is optional
     $router->addRoute('GET', '/articles/{id:\d+}[/{title}]', function ($vars) {
       print_r($vars);
+    });
+    // logger
+    $router->addRoute('GET', '/logger', function ($vars) {
+      $content = explode("\n", file_get_contents(__DIR__ . '/.log'));
+      foreach ($content as $v) {
+        echo $v . '<br/>';
+      }
     });
   });
 });
