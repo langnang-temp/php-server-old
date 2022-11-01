@@ -1,4 +1,4 @@
-name: 🚀 Deploy website to develop on push with FTP
+name: 🚀 Deploy website to beta on push with FTP
 
 on:
   push:
