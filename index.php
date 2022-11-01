@@ -51,10 +51,33 @@ return array(
       $_CONFIG = require_once(__DIR__ . '/config.inc.php');
       var_dump($_CONFIG);
     });
+    // mysql connection
     $router->addRoute('GET', '/conn', function ($vars) {
       $_CONFIG = require_once(__DIR__ . '/config.inc.php');
       $conn = \Doctrine\DBAL\DriverManager::getConnection($_CONFIG);
       $rows = $conn->fetchAllAssociative("SHOW TABLES");
+      var_dump($rows);
+    });
+    $router->addRoute('GET', '/monolog-mysql', function ($vars) {
+      $_CONFIG = require_once(__DIR__ . '/config.inc.php');
+      $conn = \Doctrine\DBAL\DriverManager::getConnection($_CONFIG);
+      $sql_create_table = "CREATE TABLE IF NOT EXISTS `log` (
+        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, channel VARCHAR(255), level INTEGER, message LONGTEXT, time INTEGER UNSIGNED, INDEX(channel) USING HASH, INDEX(level) USING HASH, INDEX(time) USING BTREE
+    )";
+      $conn->executeQuery($sql_create_table);
+      $pdo = new PDO("mysql" . ":dbname=" . $_CONFIG["dbname"] . ";host=" . $_CONFIG["host"], $_CONFIG["user"], $_CONFIG["password"]);
+
+      $mySQLHandler = new MySQLHandler\MySQLHandler($pdo, "log", array('var', 'result', 'uuid', 'timestamp'), \Monolog\Logger::DEBUG);
+
+      //Create logger
+      $logger = new \Monolog\Logger("monolog-mysql");
+      $logger->pushHandler($mySQLHandler);
+
+      //Now you can use the logger, and further attach additional information
+      $logger->warning("This is a great message, woohoo!", array('var'  => 'var', 'result'  => 'result', 'uuid'  => 'uuid', 'timestamp'  => 'timestamp'));
+
+      $sql_select_list = "SELECT * FROM `log` ORDER BY `id` DESC LIMIT 10 ";
+      $rows = $conn->fetchAllAssociative($sql_select_list);
       var_dump($rows);
     });
   });

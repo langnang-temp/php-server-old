@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d57865db8f8663e84bbf4e622462e387",
+    "content-hash": "20e0155135510a61c737bdc6d09aa41f",
     "packages": [
         {
             "name": "doctrine/cache",
@@ -595,6 +595,56 @@
                 "source": "https://github.com/php-fig/log/tree/1.1.4"
             },
             "time": "2021-05-03T11:20:27+00:00"
+        },
+        {
+            "name": "wazaari/monolog-mysql",
+            "version": "v1.0.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/waza-ari/monolog-mysql.git",
+                "reference": "ef947b62674c0701ef9b612406e8c164ce32a3e7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/waza-ari/monolog-mysql/zipball/ef947b62674c0701ef9b612406e8c164ce32a3e7",
+                "reference": "ef947b62674c0701ef9b612406e8c164ce32a3e7",
+                "shasum": ""
+            },
+            "require": {
+                "ext-pdo": "*",
+                "ext-pdo_mysql": "*",
+                "monolog/monolog": ">1.4.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "MySQLHandler\\": "src/MySQLHandler"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Daniel Herrmann",
+                    "email": "daniel.herrmann1@gmail.com"
+                }
+            ],
+            "description": "A handler for Monolog that sends messages to MySQL",
+            "homepage": "https://github.com/waza-ari/monolog-mysql",
+            "keywords": [
+                "database",
+                "log",
+                "logging",
+                "monolog",
+                "mysql"
+            ],
+            "support": {
+                "issues": "https://github.com/waza-ari/monolog-mysql/issues",
+                "source": "https://github.com/waza-ari/monolog-mysql/tree/v1.0.6"
+            },
+            "time": "2020-07-03T07:35:44+00:00"
         }
     ],
     "packages-dev": [],
