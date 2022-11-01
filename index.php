@@ -36,6 +36,27 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $rou
         echo $v . '<br/>';
       }
     });
+    // configs
+    $router->addRoute('GET', '/install/{host}/{dbname}/{user}/{password}', function ($vars) {
+      $content = "<?php 
+return array(
+  'host' => '{$vars['host']}',
+  'dbname' => '{$vars['dbname']}',
+  'user' => '{$vars['user']}',
+  'password' => '{$vars['password']}',
+  'driver' => 'pdo_mysql',
+);      
+";
+      file_put_contents(__DIR__ . '/config.inc.php', $content);
+      $_CONFIG = require_once(__DIR__ . '/config.inc.php');
+      var_dump($_CONFIG);
+    });
+    $router->addRoute('GET', '/conn', function ($vars) {
+      $_CONFIG = require_once(__DIR__ . '/config.inc.php');
+      $conn = \Doctrine\DBAL\DriverManager::getConnection($_CONFIG);
+      $rows = $conn->fetchAllAssociative("SHOW TABLES");
+      var_dump($rows);
+    });
   });
 });
 
