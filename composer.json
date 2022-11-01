@@ -1,0 +1,10 @@
+{
+  "name": "langnang/php-server",
+  "authors": [
+    {
+      "name": "langnang",
+      "email": "langnang.chen@outlook.com"
+    }
+  ],
+  "require": {}
+}
