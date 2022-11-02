@@ -4,13 +4,26 @@
 // TODO 2. result try-catch
 // TODO 3. swagger
 
-require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/src/utils/main.php';
-require_once __DIR__ . '/src/modules/main.php';
+// 允许跨域请求
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, GET, PUT, OPTIONS, PATCH, DELETE');
+header('Access-Control-Allow-Credentials: true');
+header('Access-Control-Allow-Headers: Authorization, Content-Type, x-xsrf-token, x_csrftoken, Cache-Control, X-Requested-With');
 
+require_once __DIR__ . '/vendor/autoload.php';
+
+// program configuration
+if (!file_exists(__DIR__ . '/config.inc.php')) exit("no program configuration.");
+
+$_CONFIG = require_once __DIR__ . '/config.inc.php';
+
+$_CONNECTION = \Doctrine\DBAL\DriverManager::getConnection($_CONFIG['db']);
 
 // 伪静态
-$rewrite = "/?";
+$rewrite = is_null($_CONFIG['rewrite']) ? '' : $_CONFIG['rewrite'];
+
+require_once __DIR__ . '/src/utils/main.php';
+require_once __DIR__ . '/src/modules/main.php';
 
 // create a log channel
 $log = new Monolog\Logger('name');
