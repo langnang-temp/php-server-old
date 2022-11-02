@@ -95,6 +95,13 @@ return array(
       header('Content-Type: application/json');
       echo $openapi->toJson();
     });
+
+    // faker
+    $router->addRoute('GET', '/faker/{method}', function ($vars) {
+      $_FAKER = Faker\Factory::create();
+      $method = $vars['method'];
+      print_r(["method" => $method, "value" => $_FAKER->{$vars['method']}()]);
+    });
   });
 });
 
