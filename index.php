@@ -91,9 +91,9 @@ return array(
     });
     // swagger-php
     $router->addRoute('GET', '/swagger-php', function ($vars) {
-      $openapi = \OpenApi\Generator::scan(['/swagger']);
-      header('Content-Type: application/x-yaml');
-      echo $openapi->toYaml();
+      $openapi = \OpenApi\Generator::scan(['swagger/examples']);
+      header('Content-Type: application/json');
+      echo $openapi->toJson();
     });
   });
 });
