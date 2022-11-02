@@ -12,7 +12,6 @@ $log->pushHandler(new Monolog\Handler\StreamHandler(__DIR__ . '/.log', Monolog\L
 $log->warning('Foo');
 $log->error('Bar');
 
-
 $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $router) use ($rewrite) {
   $router->addGroup($rewrite, function (FastRoute\RouteCollector $router) {
     $router->addRoute('GET', '/', function ($vars) {
@@ -102,8 +101,23 @@ return array(
       $method = $vars['method'];
       print_r(["method" => $method, "value" => $_FAKER->{$vars['method']}()]);
     });
+
+    $router->addRoute("GET", "/request", function ($vars) {
+      // if (!isset($vars['url'])) return new Exception("no url specified.");
+      // $url = $vars['url'];
+      $url = 'https://inshorts.deta.dev/news?category=science';
+      $method = strtolower($vars['method']);
+      $headers = isset($vars['headers']) ? (array)$vars['headers'] : [];
+      $data = isset($vars['data']) ? (array)$vars['data'] : [];
+      if (!in_array($method, ['get', 'post', 'put', 'delete'])) $method = 'get';
+      $response = WpOrg\Requests\Requests::$method($url, $headers, $data);
+      $body = json_decode($response->body, true);
+      if (!is_null($body)) $response->body = $body;
+      var_dump($response);
+    });
   });
 });
+
 
 // Fetch method and URI from somewhere
 $httpMethod = $_SERVER['REQUEST_METHOD'];
