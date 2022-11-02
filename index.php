@@ -83,11 +83,17 @@ return array(
     // try-catch
     $router->addRoute('GET', '/try-catch', function ($vars) {
       try {
-        throw  new Exception("test try-catch exception.");
+        throw new Exception("test try-catch exception.");
         exit;
       } catch (Exception $error) {
         echo $error->getMessage();
       }
+    });
+    // swagger-php
+    $router->addRoute('GET', '/swagger-php', function ($vars) {
+      $openapi = \OpenApi\Generator::scan(['/swagger']);
+      header('Content-Type: application/x-yaml');
+      echo $openapi->toYaml();
     });
   });
 });
