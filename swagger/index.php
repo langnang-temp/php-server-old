@@ -22,8 +22,7 @@
       // the following lines will be replaced by docker/configurator, when it runs in a docker-container
       window.ui = SwaggerUIBundle({
         // url: "https://petstore.swagger.io/v2/swagger.json",
-        url: "/?/swagger-php",
-        // urls: <? echo file_get_contents("{$_SERVER['REQUEST_SCHEME']}://{$_SERVER['HTTP_HOST']}/?/api/swagger") ?>,
+        urls: <? echo file_get_contents("{$_SERVER['REQUEST_SCHEME']}://{$_SERVER['HTTP_HOST']}/?/api/swagger") ?>,
         dom_id: '#swagger-ui',
         deepLinking: true,
         presets: [

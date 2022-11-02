@@ -1,104 +1,42 @@
 <?php
 $router->addGroup("/api", function (FastRoute\RouteCollector $router) {
-  $router->addRoute('GET', '/', function ($vars) {
-    print_r($vars);
-  });
-  $router->addRoute('GET', '/users', function ($vars) {
-    print_r("users");
-  });
-  // {id} must be a number (\d+)
-  $router->addRoute('GET', '/user/{id:\d+}', function ($vars) {
-    print_r($vars);
-  });
-  // The /{title} suffix is optional
-  $router->addRoute('GET', '/articles/{id:\d+}[/{title}]', function ($vars) {
-    print_r($vars);
-  });
-  // logger
-  $router->addRoute('GET', '/logger', function ($vars) {
-    $content = explode("\n", file_get_contents(__DIR__ . '/../../.log'));
-    foreach ($content as $v) {
-      echo $v . '<br/>';
-    }
-  });
-  // configs
-  $router->addRoute('GET', '/install/{host}/{dbname}/{user}/{password}', function ($vars) {
-    $content = "<?php 
-return array(
-'host' => '{$vars['host']}',
-'dbname' => '{$vars['dbname']}',
-'user' => '{$vars['user']}',
-'password' => '{$vars['password']}',
-'driver' => 'pdo_mysql',
-);      
-";
-    file_put_contents(__DIR__ . '/../../config.inc.php', $content);
-    $_CONFIG = require_once(__DIR__ . '/../../config.inc.php');
-    var_dump($_CONFIG);
-  });
-  // mysql connection
-  $router->addRoute('GET', '/conn', function ($vars) {
-    $_CONFIG = require_once(__DIR__ . '/../../config.inc.php');
-    $conn = \Doctrine\DBAL\DriverManager::getConnection($_CONFIG);
-    $rows = $conn->fetchAllAssociative("SHOW TABLES");
-    var_dump($rows);
-  });
-  $router->addRoute('GET', '/monolog-mysql', function ($vars) {
-    $_CONFIG = require_once(__DIR__ . '/../../config.inc.php');
-    $conn = \Doctrine\DBAL\DriverManager::getConnection($_CONFIG);
-    $sql_create_table = "CREATE TABLE IF NOT EXISTS `log` (
-      id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, channel VARCHAR(255), level INTEGER, message LONGTEXT, time INTEGER UNSIGNED, INDEX(channel) USING HASH, INDEX(level) USING HASH, INDEX(time) USING BTREE
-  )";
-    $conn->executeQuery($sql_create_table);
-    $pdo = new PDO("mysql" . ":dbname=" . $_CONFIG["dbname"] . ";host=" . $_CONFIG["host"], $_CONFIG["user"], $_CONFIG["password"]);
 
-    $mySQLHandler = new MySQLHandler\MySQLHandler($pdo, "log", array('var', 'result', 'uuid', 'timestamp'), \Monolog\Logger::DEBUG);
+  require_once __DIR__ . '/example.php';
 
-    //Create logger
-    $logger = new \Monolog\Logger("monolog-mysql");
-    $logger->pushHandler($mySQLHandler);
+  $router->addGroup("/swagger", function (FastRoute\RouteCollector $router) {
+    $router->addRoute('GET', '', function ($vars) {
+      global $_SWAGGER;
 
-    //Now you can use the logger, and further attach additional information
-    $logger->warning("This is a great message, woohoo!", array('var'  => 'var', 'result'  => 'result', 'uuid'  => 'uuid', 'timestamp'  => 'timestamp'));
-
-    $sql_select_list = "SELECT * FROM `log` ORDER BY `id` DESC LIMIT 10 ";
-    $rows = $conn->fetchAllAssociative($sql_select_list);
-    var_dump($rows);
-  });
-  // try-catch
-  $router->addRoute('GET', '/try-catch', function ($vars) {
-    try {
-      throw new Exception("test try-catch exception.");
+      header('Content-Type: application/json');
+      echo json_encode(array_map(function ($item) {
+        unset($item['path']);
+        return $item;
+      }, $_SWAGGER), JSON_UNESCAPED_UNICODE);
       exit;
-    } catch (Exception $error) {
-      echo $error->getMessage();
+    });
+  });
+
+  $router->addRoute('GET', '/swagger/{module:.+}', function ($vars) {
+    global $_SWAGGER;
+    $index = false;
+    foreach ($_SWAGGER as $key => $item) {
+      if ($item['name'] == $vars['module']) $index = $key;
     }
-  });
-  // swagger-php
-  $router->addRoute('GET', '/swagger-php', function ($vars) {
-    $openapi = \OpenApi\Generator::scan(['swagger/examples']);
+    if ($index === false) throw new Exception("error find swagger.");
+
+    $openapi = \OpenApi\Generator::scan([$_SWAGGER[$index]['path']]);
+
+    $openapi = json_decode($openapi->toJson(), true);
+    $paths = $openapi['paths'];
+    $openapi['paths'] = [];
+    foreach ($paths as $path => $value) {
+      $openapi['paths']['/?' . $path] = $value;
+    }
     header('Content-Type: application/json');
-    echo $openapi->toJson();
+    echo json_encode($openapi, JSON_UNESCAPED_UNICODE);
+    exit;
+    // return false;
   });
 
-  // faker
-  $router->addRoute('GET', '/faker/{method}', function ($vars) {
-    $_FAKER = Faker\Factory::create();
-    $method = $vars['method'];
-    print_r(["method" => $method, "value" => $_FAKER->{$vars['method']}()]);
-  });
-
-  $router->addRoute("GET", "/request", function ($vars) {
-    // if (!isset($vars['url'])) return new Exception("no url specified.");
-    // $url = $vars['url'];
-    $url = 'https://inshorts.deta.dev/news?category=science';
-    $method = strtolower($vars['method']);
-    $headers = isset($vars['headers']) ? (array)$vars['headers'] : [];
-    $data = isset($vars['data']) ? (array)$vars['data'] : [];
-    if (!in_array($method, ['get', 'post', 'put', 'delete'])) $method = 'get';
-    $response = WpOrg\Requests\Requests::$method($url, $headers, $data);
-    $body = json_decode($response->body, true);
-    if (!is_null($body)) $response->body = $body;
-    var_dump($response);
-  });
+  // require swagger apis
 });

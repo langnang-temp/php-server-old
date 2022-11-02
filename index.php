@@ -1,4 +1,9 @@
 <?php
+
+// TODO 1. 修改index文件结构
+// TODO 2. result try-catch
+// TODO 3. swagger
+
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/src/utils/main.php';
 require_once __DIR__ . '/src/modules/main.php';
@@ -14,6 +19,9 @@ $log->pushHandler(new Monolog\Handler\StreamHandler(__DIR__ . '/.log', Monolog\L
 // add records to the log
 $log->warning('Foo');
 $log->error('Bar');
+
+// swagger
+$_SWAGGER = [];
 
 $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $router) use ($rewrite) {
   $router->addGroup($rewrite, function (FastRoute\RouteCollector $router) {
