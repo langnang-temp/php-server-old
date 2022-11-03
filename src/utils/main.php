@@ -28,3 +28,30 @@ function require_path($path, $callback)
     }
   }
 }
+
+/**
+ * 过滤处理数据
+ */
+function filter($value, $program, $separator = "|")
+{
+  return  array_reduce(explode($separator, $program), function ($value, $exp) {
+    $funcExpArray = preg_split("/(\(|\)|,)/", $exp);
+    $last = array_pop($funcExpArray);
+    $funcName = $funcExpArray[0];
+    if (function_exists($funcName)) {
+      if (in_array($funcName, ['explode'])) {
+        $value = call_user_func($funcName, $funcExpArray[1], $value, ...array_slice($funcExpArray, 2));
+      } else {
+        $value = call_user_func($funcName, $value, ...array_slice($funcExpArray, 1));
+      }
+    } else {
+      throw new Exception("not exist function({$funcName}).");
+      return;
+    }
+    if ($last && $last[0] == '[' && $last[strlen($last) - 1] == ']') {
+      $key = substr($last, 1, -1);
+      $value = $value[$key];
+    }
+    return $value;
+  }, $value);
+}
