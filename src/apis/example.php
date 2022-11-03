@@ -60,25 +60,23 @@ array_push($_SWAGGER, ["name" => "{$module}", "url" => "/?/api/swagger/{$module}
 
 
 $router->addRoute('GET', '/', function ($vars) {
-  print_r($vars);
+  return $vars;
 });
 $router->addRoute('GET', '/users', function ($vars) {
-  print_r("users");
+  return $vars;
 });
 // {id} must be a number (\d+)
 $router->addRoute('GET', '/user/{id:\d+}', function ($vars) {
-  print_r($vars);
+  return $vars;
 });
 // The /{title} suffix is optional
 $router->addRoute('GET', '/articles/{id:\d+}[/{title}]', function ($vars) {
-  print_r($vars);
+  return $vars;
 });
 // logger
 $router->addRoute('GET', '/logger', function ($vars) {
   $content = explode("\n", file_get_contents(__DIR__ . '/../../.log'));
-  foreach ($content as $v) {
-    echo $v . '<br/>';
-  }
+  return $content;
 });
 // configs
 $router->addRoute('GET', '/install/{host}/{dbname}/{user}/{password}', function ($vars) {
@@ -96,14 +94,14 @@ return array(
 ";
   file_put_contents(__DIR__ . '/../../config.inc.php', $content);
   $_CONFIG = require_once(__DIR__ . '/../../config.inc.php');
-  var_dump($_CONFIG);
+  return $_CONFIG;
 });
 // mysql connection
 $router->addRoute('GET', '/conn', function ($vars) {
   $_CONFIG = require_once(__DIR__ . '/../../config.inc.php');
   $conn = \Doctrine\DBAL\DriverManager::getConnection($_CONFIG);
   $rows = $conn->fetchAllAssociative("SHOW TABLES");
-  var_dump($rows);
+  return $rows;
 });
 $router->addRoute('GET', '/monolog-mysql', function ($vars) {
   $_CONFIG = require_once(__DIR__ . '/../../config.inc.php');
@@ -125,29 +123,25 @@ $router->addRoute('GET', '/monolog-mysql', function ($vars) {
 
   $sql_select_list = "SELECT * FROM `log` ORDER BY `id` DESC LIMIT 10 ";
   $rows = $conn->fetchAllAssociative($sql_select_list);
-  var_dump($rows);
+  return $rows;
 });
 // try-catch
 $router->addRoute('GET', '/try-catch', function ($vars) {
-  try {
-    throw new Exception("test try-catch exception.");
-    exit;
-  } catch (Exception $error) {
-    echo $error->getMessage();
-  }
+  throw new Exception("test try-catch exception.");
 });
 // swagger-php
 $router->addRoute('GET', '/swagger-php', function ($vars) {
   $openapi = \OpenApi\Generator::scan([__FILE__]);
   header('Content-Type: application/json');
   echo $openapi->toJson();
+  exit;
 });
 
 // faker
 $router->addRoute('GET', '/faker/{method}', function ($vars) {
   $_FAKER = Faker\Factory::create();
   $method = $vars['method'];
-  print_r(["method" => $method, "value" => $_FAKER->{$vars['method']}()]);
+  return ["method" => $method, "value" => $_FAKER->{$vars['method']}()];
 });
 
 $router->addRoute("GET", "/request", function ($vars) {
@@ -161,5 +155,5 @@ $router->addRoute("GET", "/request", function ($vars) {
   $response = WpOrg\Requests\Requests::$method($url, $headers, $data);
   $body = json_decode($response->body, true);
   if (!is_null($body)) $response->body = $body;
-  var_dump($response);
+  return $response;
 });
