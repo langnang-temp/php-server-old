@@ -10,3 +10,6 @@ composer.phar
 
 # config
 config.inc.php
+
+# modules
+/src/modules/
