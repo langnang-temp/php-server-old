@@ -4,26 +4,40 @@
 // TODO 2. result try-catch
 // TODO 3. swagger
 
-// 允许跨域请求
+/** 允许跨域请求 **/
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, GET, PUT, OPTIONS, PATCH, DELETE');
 header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Headers: Authorization, Content-Type, x-xsrf-token, x_csrftoken, Cache-Control, X-Requested-With');
 
+/** 载入依赖 **/
 require_once __DIR__ . '/vendor/autoload.php';
 
-// program configuration
-if (!file_exists(__DIR__ . '/config.inc.php')) exit("no program configuration.");
 
+/** 载入配置支持 */
+if (!file_exists(__DIR__ . '/config.inc.php')) {
+  file_exists('./install.php') ? header('Location: install.php') : print('Missing Config File');
+  exit;
+}
 $_CONFIG = require_once __DIR__ . '/config.inc.php';
 
+/** 链接数据库 **/
 $_CONNECTION = \Doctrine\DBAL\DriverManager::getConnection($_CONFIG['db']);
 
-// 伪静态
+/** 伪静态 **/
 $rewrite = is_null($_CONFIG['rewrite']) ? '' : $_CONFIG['rewrite'];
 
 require_once __DIR__ . '/src/utils/main.php';
 require_once __DIR__ . '/src/modules/main.php';
+
+/** faker **/
+$_FAKER = Faker\Factory::create();
+
+/** logger **/
+$pdo = new PDO("mysql" . ":dbname=" . $_CONFIG['db']["dbname"] . ";host=" . $_CONFIG['db']["host"], $_CONFIG['db']["user"], $_CONFIG['db']["password"]);
+
+/** Create MysqlHandler **/
+$mySQLHandler = new MySQLHandler\MySQLHandler($pdo, "log", array('var', 'value', 'uuid', 'timestamp'), \Monolog\Logger::DEBUG);
 
 // create a log channel
 $log = new Monolog\Logger('name');
@@ -57,15 +71,23 @@ if (false !== $pos = strpos(substr($uri, strlen($rewrite)), '?')) {
 $uri = rawurldecode($uri);
 
 $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
+
+$result = null;
+
 switch ($routeInfo[0]) {
   case FastRoute\Dispatcher::NOT_FOUND:
-    die("404 Not Found");
     // ... 404 Not Found
+    if (preg_match('/^\/api/', substr($uri, strlen($rewrite)))) {
+      $result = new Exception("404 Not Found", 404);
+    } else {
+      echo file_get_contents(__DIR__ . "/src/views/404.html");
+      exit;
+    }
     break;
   case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
     $allowedMethods = $routeInfo[1];
-    die("405 Method Not Allowed");
     // ... 405 Method Not Allowed
+    $result = new Exception("405 Method Not Allowed", 405);
     break;
   case FastRoute\Dispatcher::FOUND:
     $handler = $routeInfo[1];

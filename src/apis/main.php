@@ -1,4 +1,16 @@
 <?php
+
+global $_SWAGGER;
+$module = "main";
+array_push($_SWAGGER, ["name" => "{$module}", "url" => "/?/api/swagger/{$module}", "path" => __FILE__]);
+
+/**
+ * @OA\Info(
+ *     title="PhpServer APIs",
+ *     version="1.0",
+ * )
+ */
+
 $router->addGroup("/api", function (FastRoute\RouteCollector $router) {
 
   require_once __DIR__ . '/example.php';
@@ -15,6 +27,7 @@ $router->addGroup("/api", function (FastRoute\RouteCollector $router) {
       exit;
     });
   });
+
 
   $router->addRoute('GET', '/swagger/{module:.+}', function ($vars) {
     global $_SWAGGER;

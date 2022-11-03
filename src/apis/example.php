@@ -84,11 +84,14 @@ $router->addRoute('GET', '/logger', function ($vars) {
 $router->addRoute('GET', '/install/{host}/{dbname}/{user}/{password}', function ($vars) {
   $content = "<?php 
 return array(
-'host' => '{$vars['host']}',
-'dbname' => '{$vars['dbname']}',
-'user' => '{$vars['user']}',
-'password' => '{$vars['password']}',
-'driver' => 'pdo_mysql',
+  'rewrite' => '/?',
+  'db' => array(
+    'host' => '{$vars['host']}',
+    'dbname' => '{$vars['dbname']}',
+    'user' => '{$vars['user']}',
+    'password' => '{$vars['password']}',
+    'driver' => 'pdo_mysql',
+  ),      
 );      
 ";
   file_put_contents(__DIR__ . '/../../config.inc.php', $content);
