@@ -12,4 +12,4 @@ composer.phar
 config.inc.php
 
 # modules
-/src/modules
+#/src/modules
