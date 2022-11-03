@@ -58,14 +58,31 @@ array_push($_SWAGGER, ["name" => "{$module}", "url" => "/?/api/swagger/{$module}
  * )
  */
 
-
+/**
+ * @OA\Get(
+ *     path="/api/",
+ *     @OA\Response(response=200, description="Success")
+ * )
+ */
 $router->addRoute('GET', '/', function ($vars) {
   return $vars;
 });
+/**
+ * @OA\Get(
+ *     path="/api/users",
+ *     @OA\Response(response=200, description="Success")
+ * )
+ */
 $router->addRoute('GET', '/users', function ($vars) {
   return $vars;
 });
-// {id} must be a number (\d+)
+/**
+ * @OA\Get(
+ *     path="/api/{id}",
+ *     description="{id} must be a number (\d+)",
+ *     @OA\Response(response=200, description="Success")
+ * )
+ */
 $router->addRoute('GET', '/user/{id:\d+}', function ($vars) {
   return $vars;
 });
@@ -125,11 +142,21 @@ $router->addRoute('GET', '/monolog-mysql', function ($vars) {
   $rows = $conn->fetchAllAssociative($sql_select_list);
   return $rows;
 });
-// try-catch
+/**
+ * @OA\Get(
+ *     path="/api/try-catch",
+ *     @OA\Response(response=200, description="Success")
+ * )
+ */
 $router->addRoute('GET', '/try-catch', function ($vars) {
   throw new Exception("test try-catch exception.");
 });
-// swagger-php
+/**
+ * @OA\Get(
+ *     path="/api/swagger-php",
+ *     @OA\Response(response=200, description="Success"),
+ * )
+ */
 $router->addRoute('GET', '/swagger-php', function ($vars) {
   $openapi = \OpenApi\Generator::scan([__FILE__]);
   header('Content-Type: application/json');
@@ -137,17 +164,46 @@ $router->addRoute('GET', '/swagger-php', function ($vars) {
   exit;
 });
 
-// faker
+/**
+ * @OA\Get(
+ *     path="/api/faker/{method}",
+ *     summary="fakerphp/faker",
+ *     @OA\Parameter(
+ *         name="method",
+ *         in="path",
+ *         required=true,
+ *     @OA\Schema(type="string",default="uuid")
+ *   ),
+ *   @OA\Response(response=200, description="Success"),
+ * )
+ */
 $router->addRoute('GET', '/faker/{method}', function ($vars) {
   $_FAKER = Faker\Factory::create();
   $method = $vars['method'];
   return ["method" => $method, "value" => $_FAKER->{$vars['method']}()];
 });
-
-$router->addRoute("GET", "/request", function ($vars) {
-  // if (!isset($vars['url'])) return new Exception("no url specified.");
-  // $url = $vars['url'];
-  $url = 'https://inshorts.deta.dev/news?category=science';
+/**
+ * @OA\Post(
+ *     path="/api/request",
+ *     summary="rmccue/requests",
+ *     @OA\RequestBody(
+ *         @OA\MediaType(
+ *             mediaType="application/json",
+ *             @OA\Schema(
+ *                 @OA\Property(property="url", type="string", default="https://inshorts.deta.dev/news?category=science",),
+ *                 @OA\Property(property="method", type="string", default="get",),
+ *                 @OA\Property(property="headers", type="object",),
+ *                 @OA\Property(property="data", type="object",),
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(response="200", description="Success!"),
+ * )
+ */
+$router->addRoute("POST", "/request", function ($vars) {
+  if (!isset($vars['url'])) throw new Exception("no url specified.");
+  $url = $vars['url'];
+  // $url = 'https://inshorts.deta.dev/news?category=science';
   $method = strtolower($vars['method']);
   $headers = isset($vars['headers']) ? (array)$vars['headers'] : [];
   $data = isset($vars['data']) ? (array)$vars['data'] : [];

@@ -2,7 +2,7 @@
 
 global $_SWAGGER;
 $module = "main";
-array_push($_SWAGGER, ["name" => "{$module}", "url" => "/?/api/swagger/{$module}", "path" => __FILE__]);
+// array_push($_SWAGGER, ["name" => "{$module}", "url" => "/?/api/swagger/{$module}", "path" => __FILE__]);
 
 /**
  * @OA\Info(
