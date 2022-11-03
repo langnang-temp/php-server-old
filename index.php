@@ -1,18 +1,13 @@
 <?php
 
-// TODO 1. 修改index文件结构
-// TODO 2. result try-catch
-// TODO 3. swagger
-
-/** 允许跨域请求 **/
+/** 允许跨域请求 */
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, GET, PUT, OPTIONS, PATCH, DELETE');
 header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Headers: Authorization, Content-Type, x-xsrf-token, x_csrftoken, Cache-Control, X-Requested-With');
 
-/** 载入依赖 **/
+/** 载入依赖 */
 require_once __DIR__ . '/vendor/autoload.php';
-
 
 /** 载入配置支持 */
 if (!file_exists(__DIR__ . '/config.inc.php')) {
@@ -21,20 +16,20 @@ if (!file_exists(__DIR__ . '/config.inc.php')) {
 }
 $_CONFIG = require_once __DIR__ . '/config.inc.php';
 
-/** 链接数据库 **/
+/** 链接数据库 */
 $_CONNECTION = \Doctrine\DBAL\DriverManager::getConnection($_CONFIG['db']);
 
-/** 伪静态 **/
+/** 伪静态 */
 $rewrite = is_null($_CONFIG['rewrite']) ? '' : $_CONFIG['rewrite'];
 
 require_once __DIR__ . '/src/utils/main.php';
 require_once __DIR__ . '/src/modules/main.php';
 
-/** faker **/
+/** faker */
 $_FAKER = Faker\Factory::create();
 
 
-// swagger
+/** swagger */
 $_SWAGGER = [];
 
 // Fetch method and URI from somewhere
@@ -43,22 +38,21 @@ $httpMethod = $_SERVER['REQUEST_METHOD'];
 $uri = $_SERVER['REQUEST_URI'];
 
 // Strip query string (?foo=bar) and decode URI
-if (false !== $pos = strpos(substr($uri, strlen($rewrite)),  '?')) {
+if (false !== $pos = strpos(substr($uri, strlen($rewrite)), '?')) {
   $uri = substr($uri, 0, $pos);
 }
 $uri = rawurldecode($uri);
 
-// logger
+/** logger */
+$_API_LOGGER = new Monolog\Logger(substr($uri, 2));
+
 $pdo = new PDO("mysql" . ":dbname=" . $_CONFIG['db']["dbname"] . ";host=" . $_CONFIG['db']["host"], $_CONFIG['db']["user"], $_CONFIG['db']["password"]);
 
-//Create MysqlHandler
+/** Create MysqlHandler */
 $mySQLHandler = new MySQLHandler\MySQLHandler($pdo, "log", array('var', 'value', 'uuid', 'timestamp'), \Monolog\Logger::DEBUG);
 
-// logger
-$_API_LOGGER = new Monolog\Logger(substr($uri, 2));
 $_API_LOGGER->pushHandler($mySQLHandler);
 $_API_LOGGER_UUID = md5(time() . mt_rand(1, 1000000));
-
 
 $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $router) use ($rewrite) {
   $router->addGroup($rewrite, function (FastRoute\RouteCollector $router) {
@@ -66,7 +60,6 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $rou
     require_once __DIR__ . '/src/routes/main.php';
   });
 });
-
 
 $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
 
@@ -116,22 +109,30 @@ switch ($routeInfo[0]) {
     break;
 }
 
-
-if (preg_match('/^\/api/', substr($uri, strlen($rewrite)))) {
-  if ($result instanceof Exception) {
-    $result = [
-      "status" => empty($result->getCode()) ? 400 : $result->getCode(),
-      "statusText" => "Error",
-      "message" => $result->getMessage(),
-    ];
-    $_API_LOGGER->error($result["message"], array("var" => "result", "value" => json_encode($result, true), "uuid" => $_API_LOGGER_UUID, "timestamp" => timestamp()));
-  } else {
-    $result = array(
-      "status" => 200,
-      "statusText" => 'Success',
-      "data" => $result,
-    );
-  }
-  header('Content-Type: application/json');
-  echo json_encode(array_filter((array)$result), JSON_UNESCAPED_UNICODE);
+/** 返回API请求数据处理 */
+if (!preg_match('/^\/api/', substr($uri, strlen($rewrite)))) exit;
+/** 异常 */
+if ($result instanceof Exception) {
+  $result = [
+    "status" => empty($result->getCode()) ? 400 : $result->getCode(),
+    "statusText" => "Error",
+    "message" => $result->getMessage(),
+  ];
+  $_API_LOGGER->error($result["message"], array("var" => "result", "value" => json_encode($result, true), "uuid" => $_API_LOGGER_UUID, "timestamp" => timestamp()));
+} elseif (is_null($result)) {
+  $result = array(
+    "status" => 400,
+    "statusText" => 'Error',
+  );
+} else {
+  $result = array(
+    "status" => 200,
+    "statusText" => 'Success',
+    "data" => $result,
+  );
 }
+/** */
+header('Content-Type: application/json');
+/** 打印响应报文 */
+echo json_encode(array_filter((array)$result), JSON_UNESCAPED_UNICODE);
+exit;
