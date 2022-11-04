@@ -2,5 +2,5 @@
 
 // require module controllers
 require_path(__DIR__, function ($pathinfo) {
-  return $pathinfo['filename'] !== 'api' && $pathinfo['filename'] !== 'main.test';
+  return !in_array($pathinfo['filename'], ['api', 'main.test', 'main.auto']);
 });
