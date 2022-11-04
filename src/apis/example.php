@@ -106,6 +106,7 @@ return array(
     'user' => '{$vars['user']}',
     'password' => '{$vars['password']}',
     'driver' => 'pdo_mysql',
+    'charset' => 'UTF8',
   ),      
 );      
 ";
