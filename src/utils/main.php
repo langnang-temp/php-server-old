@@ -55,3 +55,25 @@ function filter($value, $program, $separator = "|")
     return $value;
   }, $value);
 }
+
+
+function request($args)
+{
+  if (!isset($args['url'])) throw new Exception("no url specified.");
+  $args = $args['url'];
+  $method = strtolower(isset($args['method']) ? $args['method'] : "GET");
+  $headers = isset($args['headers']) ? (array)$args['headers'] : [];
+  $data = isset($args['data']) ? (array)$args['data'] : [];
+  if (!in_array($method, ['get', 'post', 'put', 'delete'])) $method = 'get';
+  $response = WpOrg\Requests\Requests::$method($args, $headers, $data);
+  $result = (array)$response;
+  $result['headers'] = $response->headers->getAll();
+  foreach ($result['headers']  as $key => $value) {
+    if (is_array($value) && sizeof($value) === 1) {
+      $result['headers'][$key] = $value[0];
+    }
+  }
+  $body = json_decode($response->body, true);
+  if (!is_null($body)) $result['body'] = $body;
+  return $result;
+}

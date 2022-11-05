@@ -186,7 +186,7 @@ $router->addRoute('GET', '/faker/{method}', function ($vars) {
 /**
  * @OA\Post(
  *     path="/api/request",
- *     summary="rmccue/requests",
+ *     summary="rmccue/requests，调整适配于axios请求",
  *     @OA\RequestBody(
  *         @OA\MediaType(
  *             mediaType="application/json",
@@ -202,15 +202,16 @@ $router->addRoute('GET', '/faker/{method}', function ($vars) {
  * )
  */
 $router->addRoute("POST", "/request", function ($vars) {
-  if (!isset($vars['url'])) throw new Exception("no url specified.");
-  $url = $vars['url'];
-  // $url = 'https://inshorts.deta.dev/news?category=science';
-  $method = strtolower($vars['method']);
-  $headers = isset($vars['headers']) ? (array)$vars['headers'] : [];
-  $data = isset($vars['data']) ? (array)$vars['data'] : [];
-  if (!in_array($method, ['get', 'post', 'put', 'delete'])) $method = 'get';
-  $response = WpOrg\Requests\Requests::$method($url, $headers, $data);
-  $body = json_decode($response->body, true);
-  if (!is_null($body)) $response->body = $body;
-  return $response;
+  $result = request($vars);
+  $result['data'] = $result['body'];
+  /** */
+  header('Content-Type: application/json');
+  /** 打印响应报文 */
+  echo json_encode(array_filter([
+    "status" => $result['status_code'],
+    "data" => $result
+
+  ]), JSON_UNESCAPED_UNICODE);
+
+  exit;
 });
