@@ -77,3 +77,86 @@ function request($args)
   if (!is_null($body)) $result['body'] = $body;
   return $result;
 }
+
+function array_find_index($array, $value, $key = null)
+{
+  if (sizeof($array) == 0) return -1;
+  foreach ($array as $_key => $_value) {
+    if (is_null($key)) {
+      if ($_value == $value) {
+        return $_key;
+      }
+    } else {
+      if ($_value[$key] == $value) {
+        return $_key;
+      }
+    }
+  }
+  return -1;
+}
+/**
+ * 列表数据转树状
+ * @param array $array
+ * @param string $child_key
+ * @param string $parent_key
+ * @param mixed $parent_value = null
+ * @param int $depth = 1
+ */
+function list_to_tree(array $array, string $child_key, string $parent_key, $parent_value = null, $depth = 1)
+{
+  $array = json_decode(json_encode($array), JSON_UNESCAPED_UNICODE);
+  if ($depth === 1) {
+    foreach ($array as $item) {
+      if (!is_null($item[$parent_key]) || $item[$parent_key] != 0) {
+        if (array_find_index($array, $item[$parent_key], $child_key) == -1) {
+          array_push($array, array(
+            $child_key => $item[$parent_key],
+            $parent_key => $parent_value
+          ));
+        }
+      }
+    }
+  }
+  $children = [];
+  foreach ($array as $item) {
+    if ($item[$parent_key] === $parent_value && $item[$child_key] !== $parent_value) {
+      array_push($children, $item);
+    }
+  }
+  if (sizeof($children) == 0) {
+    return $children;
+  } else {
+    return array_map(function ($item) use ($array, $child_key, $parent_key) {
+      $item["children"] = list_to_tree($array, $child_key, $parent_key, $item[$child_key], 0);
+      return $item;
+    }, $children);
+  }
+}
+/**
+ * 树状数据转列表数据
+ */
+function tree_to_list($tree = [], $children = 'children')
+{
+  if (empty($tree) || !is_array($tree)) {
+    return $tree;
+  }
+  $arrRes = [];
+  foreach ($tree as $k => $v) {
+    $arrTmp = $v;
+    unset($arrTmp[$children]);
+    $arrRes[] = $arrTmp;
+    if (!empty($v[$children])) {
+      $arrTmp = tree_to_list($v[$children]);
+      $arrRes = array_merge($arrRes, $arrTmp);
+    }
+  }
+  return $arrRes;
+}
+
+/**
+ * 检测非零空值
+ */
+function empty_not_zero($value)
+{
+  return empty($value) && $value !== 0;
+}

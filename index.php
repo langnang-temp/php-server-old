@@ -43,6 +43,11 @@ if (false !== $pos = strpos(substr($uri, strlen($rewrite)), '?')) {
 }
 $uri = rawurldecode($uri);
 
+// redirect
+if (substr($uri, 0, strlen($rewrite)) !== $rewrite) {
+  header("Location: {$rewrite}{$uri}");
+}
+
 /** logger */
 $_API_LOGGER = new Monolog\Logger(substr($uri, 2));
 
@@ -90,6 +95,7 @@ switch ($routeInfo[0]) {
     $vars = array_merge([
       "_method" => $httpMethod,
       "_path" => $uri,
+      "_files" => $_FILES,
     ], $_GET, $_POST, $routeInfo[2]);
 
     // ... call $handler with $vars

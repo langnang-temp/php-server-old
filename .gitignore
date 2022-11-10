@@ -13,3 +13,4 @@ config.inc.php
 
 # modules
 /src/modules
+/.tmp
