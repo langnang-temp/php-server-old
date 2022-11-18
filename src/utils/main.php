@@ -160,3 +160,12 @@ function empty_not_zero($value)
 {
   return empty($value) && $value !== 0;
 }
+
+
+function read_excel()
+{
+}
+
+function write_excel()
+{
+}
