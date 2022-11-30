@@ -88,6 +88,24 @@ switch ($routeInfo[0]) {
   case FastRoute\Dispatcher::FOUND:
     $handler = $routeInfo[1];
 
+    // Request Verify
+    if ($_CONFIG['request_verify'] === true && in_array($httpMethod, ['POST', 'PUT', 'PATCH', 'DELETE'])) {
+      if (!in_array($uri, $_CONFIG['request_verify_ignore_urls'])) {
+        try {
+          if (is_string($_CONFIG['request_verify_func']) && function_exists($_CONFIG['request_verify_func'])) {
+            $user = call_user_func($_CONFIG['request_verify_func']);
+          } else if (is_array($_CONFIG['request_verify_func']) && method_exists(...$_CONFIG['request_verify_func'])) {
+            $user = call_user_func($_CONFIG['request_verify_func']);
+          } else {
+            $user = new Exception("400 Verify Method Not Exist.", 400);
+          }
+        } catch (Exception $e) {
+          $result = $e;
+          break;
+        }
+      }
+    }
+
     // POST request
     if (!is_null(json_decode(file_get_contents('php://input'), true))) {
       $_POST = array_merge($_POST, json_decode(file_get_contents('php://input'), true));
@@ -96,7 +114,8 @@ switch ($routeInfo[0]) {
       "_method" => $httpMethod,
       "_path" => $uri,
       "_files" => $_FILES,
-    ], $_GET, $_POST, $routeInfo[2]);
+      "_user" => $user,
+    ], $_GET, $_POST, $routeInfo[2],);
 
     // ... call $handler with $vars
     try {

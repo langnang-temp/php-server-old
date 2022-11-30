@@ -36,10 +36,10 @@ function filter($value, $program, $separator = "|")
 {
   return  array_reduce(explode($separator, $program), function ($value, $exp) {
     $funcExpArray = preg_split("/(\(|\)|,)/", $exp);
-    $last = array_pop($funcExpArray);
     $funcName = $funcExpArray[0];
+    $last = array_pop($funcExpArray);
     if (function_exists($funcName)) {
-      if (in_array($funcName, ['explode'])) {
+      if (in_array($funcName, ['explode', 'date'])) {
         $value = call_user_func($funcName, $funcExpArray[1], $value, ...array_slice($funcExpArray, 2));
       } else {
         $value = call_user_func($funcName, $value, ...array_slice($funcExpArray, 1));
